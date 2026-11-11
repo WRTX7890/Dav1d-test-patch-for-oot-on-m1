@@ -1,0 +1,22 @@
+--- a/src/arm/mc.h
++++ b/src/arm/mc.h
+@@ -89,7 +89,7 @@
+     }
+ #endif  // HAVE_DOTPROD
+ 
+-#if HAVE_I8MM
++#if 0 /* HAVE_I8MM disabled: i8mm asm raises SIGILL on Apple Silicon (NX2Apple iPad M1 fix) */
+     if (flags & DAV1D_ARM_CPU_FLAG_I8MM) {
+         init_8tap_fns(neon_i8mm);
+     }
+--- a/src/arm/64/mc_dotprod.S
++++ b/src/arm/64/mc_dotprod.S
+@@ -1862,7 +1862,7 @@
+ // xmx(x6), xmy(x7), ldst(x6), lsrc(x7), wd_strd(w1)
+ filter_8tap_fn  put, sdot, neon_dotprod, x0, x1, x2, x3, w4, w5, w6, w7, x6, x7, x6, x7, w1
+ 
+-#if HAVE_I8MM
++#if 0 /* HAVE_I8MM disabled: i8mm asm raises SIGILL on Apple Silicon (NX2Apple iPad M1 fix) */
+ ENABLE_I8MM
+ 
+ // dst(x0), d_strd(x7), src(x1), s_strd(x2), w(w3), h(w4), mx(w5), my(w6)

@@ -1,0 +1,15 @@
+--- a/meson.build
++++ b/meson.build
+@@ -496,6 +496,12 @@
+     cdata.set10('HAVE_' + name.to_upper(), name in supported_aarch64_instructions)
+ endforeach
+ 
++# NX2Apple/iOS fix: dav1d 1.5.x i8mm asm (USMMLA path in mc_dotprod.S) raises
++# SIGILL on Apple Silicon (e.g. iPad M1) even though FEAT_I8MM is supported.
++# Force-disable i8mm codegen and dispatch; decode falls back to the
++# neon_dotprod (SDOT) and plain NEON paths.
++cdata.set10('HAVE_I8MM', false)
++
+ cdata.set10('ARCH_X86', host_machine.cpu_family().startswith('x86'))
+ cdata.set10('ARCH_X86_64', host_machine.cpu_family() == 'x86_64')
+ cdata.set10('ARCH_X86_32', host_machine.cpu_family() == 'x86')
