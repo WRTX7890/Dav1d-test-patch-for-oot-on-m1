@@ -28,8 +28,8 @@ jobs:
         run: |
           SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
           CLANG_PATH=$(xcrun --sdk iphoneos --find clang)
-          AR_PATH=$(xcrun --find llvm-ar)
-          STRIP_PATH=$(xcrun --find llvm-strip)
+          AR_PATH=$(xcrun --find ar)
+          STRIP_PATH=$(xcrun --find strip)
           
           cat > ios-arm64.ini <<EOF
           [binaries]
