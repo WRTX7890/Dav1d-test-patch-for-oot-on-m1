@@ -1,0 +1,64 @@
+name: Build dav1d for iOS (Patched)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Apply Patches
+        run: |
+          # На всякий случай убираем CRLF из патчей, если они создавались на Windows
+          sed -i '' 's/\r$//' 0001-meson-force-HAVE_I8MM-off.patch
+          sed -i '' 's/\r$//' 0002-disable-i8mm-in-sources.patch
+          git apply 0001-meson-force-HAVE_I8MM-off.patch
+          git apply 0002-disable-i8mm-in-sources.patch
+
+      - name: Install Meson and Ninja
+        run: brew install meson ninja
+
+      - name: Configure Meson Cross-File
+        run: |
+          SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+          CLANG_PATH=$(xcrun --sdk iphoneos --find clang)
+          AR_PATH=$(xcrun --find llvm-ar)
+          STRIP_PATH=$(xcrun --find llvm-strip)
+          
+          cat > ios-arm64.ini <<EOF
+          [binaries]
+          c = '${CLANG_PATH}'
+          ar = '${AR_PATH}'
+          strip = '${STRIP_PATH}'
+          pkgconfig = 'pkg-config'
+
+          [host_machine]
+          system = 'darwin'
+          cpu_family = 'aarch64'
+          cpu = 'arm64'
+          endian = 'little'
+
+          [properties]
+          needs_exe_wrapper = true
+
+          [built-in options]
+          c_args = ['-arch', 'arm64', '-miphoneos-version-min=16.0', '-isysroot', '${SDK_PATH}', '-O2']
+          c_link_args = ['-arch', 'arm64', '-isysroot', '${SDK_PATH}']
+          EOF
+
+      - name: Build dav1d
+        run: |
+          meson setup build-ios --cross-file ios-arm64.ini --buildtype=release -Ddefault_library=static -Denable_tools=false -Denable_tests=false
+          ninja -C build-ios
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libdav1d-ios-patched
+          path: build-ios/src/libdav1d.a
