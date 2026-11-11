@@ -7,6 +7,7 @@ on:
 
 jobs:
   build:
+    # Используем самый стабильный образ macOS на Apple Silicon
     runs-on: macos-14
 
     steps:
@@ -15,7 +16,6 @@ jobs:
 
       - name: Apply Patches
         run: |
-          # На всякий случай убираем CRLF из патчей, если они создавались на Windows
           sed -i '' 's/\r$//' 0001-meson-force-HAVE_I8MM-off.patch
           sed -i '' 's/\r$//' 0002-disable-i8mm-in-sources.patch
           git apply 0001-meson-force-HAVE_I8MM-off.patch
